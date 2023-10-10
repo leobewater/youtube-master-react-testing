@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import UserForm from './UserForm';
-import { act } from 'react-dom/test-utils';
 
 test('it shows two inputs and a button', () => {
   // Arrange, Act, Assert
@@ -15,37 +14,44 @@ test('it shows two inputs and a button', () => {
   expect(button).toBeInTheDocument();
 });
 
-test('it calls onUserAdd when the form is submitted', () => {
+test('it calls onUserAdd when the form is submitted', async () => {
   // NOT the best implementation
   // const argList = [];
   // const callback = (...args) => {
   //   argList.push(args);
   // };
   // render(<UserForm onUserAdd={callback} />);
+  // expect(argList).toHaveLength(1);
+  // expect(argList[0][0]).toEqual({ name: 'jane', email: 'jane@jane.com' });
 
   const mock = jest.fn();
   render(<UserForm onUserAdd={mock} />);
 
   // find the two inputs
-  const [nameInput, emailInput] = screen.getAllByRole('textbox');
+  // const [nameInput, emailInput] = screen.getAllByRole('textbox');
+  const nameInput = screen.getByRole('textbox', {
+    name: /name/i,
+  });
+  const emailInput = screen.getByRole('textbox', {
+    name: /email/i,
+  });
+  // const emailInput = screen.getByLabelText(/enter email/i);
 
   // simulate typing a name
-  user.click(nameInput);
-  user.keyboard('jane');
+  await user.click(nameInput);
+  await user.keyboard('jane');
 
   // simulate typing in an email
-  user.click(emailInput);
-  user.keyboard('jane@jane.com');
+  await user.click(emailInput);
+  await user.keyboard('jane@jane.com');
 
   // find the button
   const button = screen.getByRole('button');
 
   // simulate clicking the button
-  user.click(button);
+  await user.click(button);
 
   // assertion to make sure 'onUserAdd' get called with email/name
-  // expect(argList).toHaveLength(1);
-  // expect(argList[0][0]).toEqual({ name: 'jane', email: 'jane@jane.com' });
   expect(mock).toHaveBeenCalled();
   expect(mock).toHaveBeenCalledWith({ name: 'jane', email: 'jane@jane.com' });
 });
